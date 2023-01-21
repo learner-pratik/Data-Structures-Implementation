@@ -183,6 +183,7 @@ public class ArrayProblems {
         // We first xor all array elems and then xor this res with nums from 1-n
         // We will get xor of a^b, elems which we need to find
         // Now we know that 1^0 = 1, therefore we find the rightmost set bit in xor res
+        // (n&~(n-1)) always return the binary no containing rightmost set bit as 1
         // Once we get that we know either a or b has that rightmost set bit
         // Thus we divide arr elems into two buckets and we add elems based on whether this bit is set or not
         // Again we add elems from 1-n based on same set bit
@@ -211,6 +212,7 @@ public class ArrayProblems {
     int maxConsecutiveOnes(int[] arr) {
         // Idea is keep track of current len and reset it when zero
         // Also update max len when resetting curr len
+        
         int mxLen = 0, currLen = 0;
         for (int a : arr) {
             if (a == 0) {
@@ -228,13 +230,53 @@ public class ArrayProblems {
         // Keep incrementing right end of window until you reach sum k
         // If window sum equals k, then update max len
         // increment start of wind and subtract that num from sum
+        
         int start = 0, end = -1, currSum = 0, n = arr.length, mxLen = 0;;
         while (start < n) {
+            
             while ((end+1) < n && currSum+arr[end+1] <= K) currSum += arr[++end];
+            
             if (currSum == K) mxLen = Math.max(mxLen, end-start+1);
+            
             currSum -= arr[start++];
         }
+
         return mxLen;
+    }
+
+    int smallestSubArrayWithSumK(int[] arr, int K) {
+        // idea is to use sliding window technique
+
+        int MX_NUM = 1_00_00_1, n = arr.length;
+        int start = 0, end = 0, currSum = 0, minLen = MX_NUM;
+
+        while (start < n) {
+            while (end < n && currSum < K) currSum += arr[end++];
+
+            if (currSum >= K) minLen = Math.min(minLen, end-start);
+
+            currSum -= arr[start++];
+        }
+
+        if (minLen==MX_NUM) return 0;
+        return minLen;
+    }
+
+    int subArraysWithProductLessThanK(int[] arr, int K) {
+         // idea is to use sliding window technique
+
+        int n = arr.length, cnt = 0;
+    
+        for (int start = 0; start < n; start++) {
+            int end = start, currProd = 1;
+
+            while (end < n && currProd*arr[end] < K) {
+                currProd *= arr[end];
+                cnt++; end++;
+            }
+        }
+
+        return cnt;
     }
 
     int subArraysWithSumK(int[] arr, int K) {
