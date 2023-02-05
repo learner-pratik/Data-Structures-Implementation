@@ -362,6 +362,7 @@ public class ArrayProblems {
         // Idea is have three pointers low mid and high
         // And we swap the values based on val at mid position
         // We increment mid along with low because mid and low start from same index, therefore we do not want to come before low
+        // thus from index 0 to low-1, we have 0s, from low to mid-1, we have 1s and from mid to high we have 2s
         int low = 0, mid = 0, high = arr.length-1;
         while (mid <= high) {
             if (arr[mid] == 0) {
@@ -392,7 +393,7 @@ public class ArrayProblems {
 
     int maxSubArraySum(int[] arr) {
         // Idea is to keep track of max sum found so far and curr sum
-        // If curr sum becomes negative as this wont contribute to final sum
+        // If curr sum becomes negative, we make curr sum as 0 as this wont contribute to final sum
         // If curr sum exceeds max sum, we update it
         int maxSum = Integer.MIN_VALUE, currSum = 0;
         for (int a : arr) {

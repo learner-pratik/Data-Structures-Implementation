@@ -1,5 +1,5 @@
 import java.math.BigInteger;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
@@ -8,45 +8,50 @@ import java.util.Stack;
 public class StringProblems {
     
     String removeOuterParentheses(String s) {
-        String res = "", tmp = "";
-        
-        char[] strChars = s.toCharArray();
-        ArrayList<String> sList = new ArrayList<>();
+        String res = "";
+        int idx = 0, cnt = 0;
+        char[] sChars = s.toCharArray();
+ 
+        for (int i = 0; i < sChars.length; i++) {
+            if (sChars[i] == '(') cnt++;
+            else cnt--;
 
-        Stack<Character> stack = new Stack<>();
-        for (int i = 0; i < strChars.length; i++) {
-            tmp += strChars[i];
-
-            if (strChars[i] == '(') stack.add(strChars[i]);
-            else {
-                stack.pop();
-                
-                if (stack.isEmpty()) {
-                    String newStr = tmp.substring(1, tmp.length()-1);
-                    sList.add(newStr);
-                    tmp = "";
-                }
+            if (cnt == 0) {
+                res += s.substring(idx+1, i);
+                idx = i+1;
             }
         }
-
-        for (String str : sList) res += str;
 
         return res;
     }
 
     String reverseWords(String s) {
-        String[] words = s.split(" ");
+        // alternate method
+        // String[] words = s.split(" ");
         
-        int left = 0, right = words.length-1;
-        while (left < right) {
-            String tmp = words[left];
-            words[left] = words[right];
-            words[right] = tmp;
+        // int left = 0, right = words.length-1;
+        // while (left < right) {
+        //     String tmp = words[left];
+        //     words[left] = words[right];
+        //     words[right] = tmp;
 
-            left++; right--;
+        //     left++; right--;
+        // }
+
+        // return String.join(" ", words);
+
+        String res = "", tmp = "";
+        char[] sChars = s.toCharArray();
+
+        for (int i = 0; i < sChars.length; i++) {
+            if (sChars[i] == ' ') {
+                if (tmp != "") res = tmp + " " + res;
+                tmp = "";
+            } else tmp += sChars[i];
         }
+        if (tmp != "") res = tmp + " " + res;
 
-        return String.join(" ", words);
+        return res.substring(0, res.length()-1);
     }
 
     String reverseWordsUsingStack(String s) {
@@ -70,17 +75,12 @@ public class StringProblems {
     }
 
     String largestOddNumber(String s) {
-        int idx = -1;
         for (int i = s.length()-1; i >= 0; i--) {
-            int v = Character.getNumericValue(s.charAt(i));
-            if (v%2 != 0) {
-                idx = i;
-                break;
-            }
+            int val = Character.getNumericValue(s.charAt(i));
+            if (val%2 != 0) return s.substring(0, i+1);
         }
-        
-        if (idx == -1) return "";
-        return s.substring(0, idx+1);
+
+        return "";
     }
 
     String longestCommonPrefixAlgo1(String[] strs) {
@@ -120,6 +120,7 @@ public class StringProblems {
         // We divide the arr into equal parts, find common prefix in left and right parts
         // Then combine and find common prefix among those two prefixes
         // Time Complexity: O(S)
+        if (left == right) return strs[left];
         
         int mid = (left+right)/2;
 
@@ -147,14 +148,15 @@ public class StringProblems {
         int minLen = Integer.MAX_VALUE;
         for (String s : strs) minLen = Math.min(minLen, s.length());
 
-        int low = 1, high = minLen;
+        int low = 0, high = minLen-1;
         while (low <= high) {
             int mid = (low+high)/2;
             if (isCommonPrefix(strs, mid)) low = mid+1;
             else high = mid-1;
         }
 
-        return strs[0].substring(0, (low+high)/2);
+        if (high < 0) return "";
+        else return strs[0].substring(0, ((low+high)/2)+1);
     }
 
     boolean isCommonPrefix(String[] strs, int mid) {
@@ -168,18 +170,38 @@ public class StringProblems {
     boolean isIsomorphic(String s, String t) {
         // Idea is to check if we can map each unique char in s to each unique char in t
 
-        HashMap<Character, Character> sTot = new HashMap<>();
-        HashMap<Character, Character> tToS = new HashMap<>();
+        // HashMap<Character, Character> sTot = new HashMap<>();
+        // HashMap<Character, Character> tToS = new HashMap<>();
+
+        // for (int i = 0; i < s.length(); i++) {
+        //     char c1 = s.charAt(i), c2 = t.charAt(i);
+            
+        //     if (!sTot.containsKey(c1) && !tToS.containsKey(c2)) {
+        //         sTot.put(c1, c2);
+        //         tToS.put(c2, c1);
+        //     } else {
+        //         if (sTot.get(c1) == null || tToS.get(c2) == null || sTot.get(c1) != c2 || tToS.get(c2) != c1)
+        //             return false;
+        //     }
+        // }
+
+        // return true;
+
+        int[] mappingStoT = new int[256];
+        Arrays.fill(mappingStoT, -1);
+
+        int[] mappingTtoS = new int[256];
+        Arrays.fill(mappingTtoS, -1);
 
         for (int i = 0; i < s.length(); i++) {
-            char c1 = s.charAt(i), c2 = t.charAt(i);
-            
-            if (!sTot.containsKey(c1) && !tToS.containsKey(c2)) {
-                sTot.put(c1, c2);
-                tToS.put(c2, c1);
-            } else {
-                if (sTot.get(c1) == null || tToS.get(c2) == null || sTot.get(c1) != c2 || tToS.get(c2) != c1)
-                    return false;
+            char c1 = s.charAt(i);
+            char c2 = t.charAt(i);
+
+            if (mappingStoT[c1] == -1 && mappingTtoS[c2] == -1) {
+                mappingStoT[c1] = c2;
+                mappingTtoS[c2] = c1;
+            } else if (!(mappingStoT[c1] == c2 && mappingTtoS[c2] == c1)) {
+                return false;
             }
         }
 
@@ -367,6 +389,32 @@ public class StringProblems {
         } else return (int) val;
     }
 
+    int subStringsWithKDistinctChars(String s, int k) {
+        // Idea to find count of substrings with atmost k distinct chars and k-1 distinct chars
+        // Subtracting the two would give count of substrings wth exactly k distinct chars
+        return subStringsAtmostKDistinctChars(s, k) - subStringsAtmostKDistinctChars(s, k-1);
+    }
+
+    int subStringsAtmostKDistinctChars(String s, int k) {
+        int res = 0, start = 0;
+        HashMap<Character, Integer> map = new HashMap<>();
+
+        for (int end = 0; end < s.length(); end++) {
+            char c1 = s.charAt(end);
+            map.put(c1, map.getOrDefault(c1, 0)+1);
+
+            while (map.size() > k) {
+                char c2 = s.charAt(start++);
+                map.put(c2, map.get(c2)-1);
+
+                if (map.get(c2) == 0) map.remove(c2);
+            }
+
+            res += end - start + 1;
+        }
+        return res;
+    }
+
     String longestPalindromicSubString(String s) {
         // Idea to use the fact that every palindrome has a center
         // Therefore we iterate through all 2n-1 center (n letters + n-1 space between each 2 letters)
@@ -395,6 +443,29 @@ public class StringProblems {
             r++;
         }
         return r-l-1;
+    }
+
+    int beautySum(String s) {
+        // Idea is to iterate over all substrings and calculate beauty of each substring
+        // TC is O(n^2)
+        
+        int res = 0;
+
+        for (int i = 0; i < s.length(); i++) {
+            int[] charCnt = new int[26];
+
+            for (int j = i; j < s.length(); j++) {
+                charCnt[s.charAt(j) - 'a']++;
+
+                int mxFreq = 0, mnFreq = 500;
+                for (int cnt : charCnt) mxFreq = Math.max(mxFreq, cnt);
+                for (int cnt : charCnt) if (cnt != 0) mnFreq = Math.min(mnFreq, cnt);
+
+                res += mxFreq - mnFreq;
+            }
+        }
+
+        return res;
     }
 
     public static void main(String[] args) {
