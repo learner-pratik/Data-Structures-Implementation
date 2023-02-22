@@ -415,6 +415,43 @@ public class ArrayProblems {
         return maxProfit;
     }
 
+    // Question - The cost of stock on each day is given in an array A[] of size N. 
+    // Find all the days on which you buy and sell the stock so that in between those days your profit is maximum.
+    void stockBuySell(int[] price, int n) {
+        // this is a good question
+
+        int buy = -1, sell = -1, currProfit = 0, mxProfit = 0;
+        boolean anyProfit = false;
+
+        for (int i = 0; i < n; i++) {
+            if (buy == -1) buy = 0;
+            else {
+                currProfit = price[i] - price[buy];
+                
+                if (currProfit < mxProfit) {
+                    if (sell != -1) {
+                        anyProfit = true;
+                        System.out.print("("+buy+" "+sell+") ");
+                    }
+
+                    mxProfit = 0;
+                    sell = -1; buy = i;
+                } else {
+                    mxProfit = currProfit;
+                    sell = i;
+                }
+            }
+        }
+        
+        if (mxProfit != 0) {
+            System.out.print("("+buy+" "+sell+") ");
+            anyProfit = true;
+        }
+        
+        if (!anyProfit) System.out.print("No Profit");
+        System.out.println();
+    }
+
     void rearrangeArray(int[] arr) {
         // Idea is to first store pos and neg elems in different arrays
         // And then insert in proper pos in original array
@@ -539,6 +576,34 @@ public class ArrayProblems {
 
         // reverse each row
         for (int i = 0; i < m; i++) reverseArray(0, n-1, arr[i]);
+    }
+
+    void rotateMatrixAntiClockwise(int[][] matrix) {
+        // transpose of matrix
+        int n = matrix.length;
+        for (int i = 0; i < n; i++) {
+            for (int j = i; j < n; j++) {
+                int tmp = matrix[i][j];
+                matrix[i][j] = matrix[j][i];
+                matrix[j][i] = tmp;
+            }
+        }
+        for (int[] arr : matrix) System.out.println(Arrays.toString(arr));
+        
+        // reverse each col
+        for (int c = 0; c < n; c++) {
+            int top = 0, bottom = n-1;
+            while (top <= bottom) {
+                // swap
+                int tmp = matrix[top][c];
+                matrix[top][c] = matrix[bottom][c];
+                matrix[bottom][c] = tmp;
+                
+                top++; bottom--;
+            }
+        }
+        System.out.println("Final Res");
+        for (int[] arr : matrix) System.out.println(Arrays.toString(arr));
     }
 
     void spiralMatrixTraversal(int[][] arr) {
@@ -725,7 +790,7 @@ public class ArrayProblems {
     }
 
     int subArraysWithXorK(int[] arr, int K) {
-        // Idea is to maintain frequency of prefix xors odf elems
+        // Idea is to maintain frequency of prefix xors of elems
         // If xor[i, j] = A and xor[i, x] = B and A*K = B, this means xor[x+1, j] = K
         // So calculate prefix xors and use that to find count
 
@@ -746,9 +811,9 @@ public class ArrayProblems {
     }
 
     int[][] mergeIntervals(int[][] arr) {
-        // Here we assume we have sorted intervals
         // If not, then we need to sort the intervals and therefore better to use arrayList instead of arr
-        
+        Arrays.sort(arr, (a, b) -> Integer.compare(a[0], b[0]));
+
         ArrayList<ArrayList<Integer>> resList = new ArrayList<>();
 
         int n = arr.length;
@@ -789,11 +854,43 @@ public class ArrayProblems {
         }
     }
 
+    void mergeSortedArrays2(int[] arr1, int[] arr2) {
+        // Above method works but can result in time limit exceed
+        // Therefore we use the gap method
+
+        int n = arr1.length, m = arr2.length;
+
+        int gap = (int) Math.ceil((double) (n+m)/2.0);
+        while (gap > 0) {
+            int i = 0, j = gap;
+            
+            while (j < (n+m)) {
+                if (j < n && arr1[i] > arr1[j])
+                    swap(arr1, arr1, i, j);
+                else if (j >= n && i < n && arr1[i] > arr2[j-n])
+                    swap(arr1, arr2, i, j-n);
+                else if (j >= n && i >= n && arr2[i-n] > arr2[j-n])
+                    swap(arr2, arr2, i-n, j-n);
+                
+                i++; j++;
+            }
+            
+            if (gap == 1) gap = 0;
+            else gap = (int) Math.ceil((double) gap/2.0);
+        }
+    }
+
+    void swap(int[] arr1, int[] arr2, int i, int j) {
+        int tmp = arr1[i];
+        arr1[i] = arr2[j];
+        arr2[j] = tmp;
+    }
+
     int countInversions(int[] arr, int[] tmp, int left, int right) {
         // Idea is to use mergesort technique which in turn utilizes divide and conquer strategy
         // For our question we need to satisfy two conditions, indices i < j and elems arr[i] > arr[j]
-        // When we divide arr into two parts, and compare elems in these parts, i < j always
-        // So oly we need to check for second condition which we do in the merging step
+        // When we divide arr into two parts, and compare elems in these parts, (i < j) is always satisfied
+        // So only we need to check for second condition which we do in the merging step
         // Since the two halves are already sorted, if we find arr[i] > arr[j], then all i+1 till mid elems will be greater than arr[j]
         // And finally we add all the counts and return the ans
 
@@ -898,4 +995,12 @@ public class ArrayProblems {
         return res;
     }
 
+    public static void main(String[] args) {
+        ArrayProblems aProblems = new ArrayProblems();
+        
+        int[] arr1 = new int[]{10, 12};
+        int[] arr2 = new int[]{5, 18, 20};
+
+        aProblems.mergeSortedArrays2(arr1, arr2);
+    }
 }

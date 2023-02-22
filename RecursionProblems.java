@@ -49,4 +49,8 @@ public class RecursionProblems {
         return fibonacciNumber(n-1)+fibonacciNumber(n-2);
     }
 
+    int countGoodNumbers(long n) {
+        return 0;
+    }
+
 }
