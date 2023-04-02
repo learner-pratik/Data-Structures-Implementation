@@ -335,10 +335,153 @@ public class RecursionProblems {
         return  map;
     }
 
+    ArrayList<ArrayList<String>> palindromePartitions(String s) {
+        ArrayList<ArrayList<String>> res = new ArrayList<>();
+        generatePartitions(s, res, new ArrayList<>(), 0);
+
+        return res;
+    }
+
+    void generatePartitions(String str, ArrayList<ArrayList<String>> resList, ArrayList<String> tmp, int idx) {
+        if (idx == str.length()) {
+            resList.add(new ArrayList<>(tmp));
+            return;
+        }
+
+        for (int i = idx; i < str.length(); i++) {
+            String p = str.substring(idx, i+1);
+            if (isPalindrome(p)) {
+                tmp.add(p);
+                generatePartitions(str, resList, tmp, idx+1);
+                tmp.remove(tmp.size()-1);
+            }
+        }
+    }
+
+    boolean isPalindrome(String s) {
+        int l = 0, r = s.length()-1;
+        while (l < r) if (s.charAt(l++) != s.charAt(r--)) return false;
+        return true;
+    }
+
+    boolean wordSearch(char[][] board, String word) {
+        int m = board.length, n = board[0].length;
+        boolean[][] visited = new boolean[m][n];
+        
+        for (int r = 0; r < m; r++) {
+            for (int c = 0; c < n; c++) {
+                if (wordExists(board, word, m, n, visited, r, c, 0)) return true;
+            }
+        }
+
+        return false;
+    }
+
+    boolean wordExists(char[][] board, String word, int m, int n, boolean[][] visited, int r, int c, int idx) {
+        if (idx == word.length()) return true;
+
+        if (visited[r][c] || board[r][c] != word.charAt(idx)) return false;
+        visited[r][c] = true;
+
+        if (r > 0 && wordExists(board, word, m, n, visited, r-1, c, idx+1)) return true;
+        if (r < m-1 && wordExists(board, word, m, n, visited, r+1, c, idx+1)) return true;
+        if (c > 0 && wordExists(board, word, m, n, visited, r, c-1, idx+1)) return true;
+        if (c < n-1 && wordExists(board, word, m, n, visited, r, c+1, idx+1)) return true;
+
+        visited[r][c] = false;
+        return false;
+    }
+
+    ArrayList<String> findPath(int[][] matrix, int n) {
+        ArrayList<String> res = new ArrayList<>();
+
+        if (matrix[0][0] == 0) return res;
+
+        boolean[][] visited = new boolean[n][n];
+        generatePath(matrix, n, visited, res, "", 0, 0);
+        
+        return res;
+    }
+
+    void generatePath(int[][] mat, int n, boolean[][] visited, ArrayList<String> resList, String tmp, int r, int c) {
+        if (visited[r][c]) return;
+
+        if (r == n-1 && c == n-1) {
+            resList.add(new String(tmp));
+            return;
+        }
+
+        visited[r][c] = true;
+
+        if (r > 0 && mat[r-1][c]==1) generatePath(mat, n, visited, resList, tmp+'U', r-1, c);
+        if (r < n-1 && mat[r+1][c] == 1) generatePath(mat, n, visited, resList, tmp+'D', r+1, c);
+        if (c > 0 && mat[r][c-1] == 1) generatePath(mat, n, visited, resList, tmp+'L', r, c-1);
+        if (c < n-1 && mat[r][c+1] == 1) generatePath(mat, n, visited, resList, tmp+'R', r, c+1);
+
+        visited[r][c] = false;
+        return;
+    }
+    
+    boolean wordBreak(String s, ArrayList<String> wordDict) {
+        return canGenerateWords(s, wordDict, 0);
+    }
+
+    boolean canGenerateWords(String str, ArrayList<String> dict, int idx) {
+        if (idx == str.length()) return true;
+
+        int i = idx;
+        while (i < str.length()) {
+            String s = str.substring(idx, i+1);
+            if (dict.contains(s)) {
+                if (canGenerateWords(str, dict, i+1)) return true;
+            }
+            i++;
+        }
+
+        return false;
+    }
+    
+    boolean graphColoring(boolean[][] graph, int m, int n) {
+        // create adjacency list
+        ArrayList<ArrayList<Integer>> adjList = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            ArrayList<Integer> nodes = new ArrayList<>();
+            for (int j = 0; j < n; j++) {
+                if (graph[i][j]) nodes.add(j);
+            }
+            adjList.add(nodes);
+        }
+
+        int[] colors = new int[n];
+        if (coloringPossible(adjList, n, m, colors, 0)) return true;
+        return false;
+    }
+
+    boolean coloringPossible(ArrayList<ArrayList<Integer>> adjList, int n, int m, int[] colors, int v) {
+        if (v == n) return true;
+
+        for (int c = 1; c <= m; c++) {
+            if (canColor(adjList, colors, v, c)) {
+                colors[v] = c;
+                if (coloringPossible(adjList, n, m, colors, v+1)) return true;
+                colors[v] = 0;
+            }
+        }
+
+        return false;
+    }
+
+    boolean canColor(ArrayList<ArrayList<Integer>> adjList, int[] colors, int node, int color) {
+        for (int v : adjList.get(node)) {
+            if (colors[v] == color) return false;
+        }
+        return true;
+    }
+
     public static void main(String[] args) {
         RecursionProblems rProblems = new RecursionProblems();
         
-        ArrayList<String> ans = rProblems.letterCombinations("23");
-        System.out.println(ans.toString());
+        boolean[][] graph = new boolean[][]{{false, true, true},{true, false, true},{true, true, false}};
+        System.out.println(rProblems.graphColoring(graph, 2, 3));
     }
 }
